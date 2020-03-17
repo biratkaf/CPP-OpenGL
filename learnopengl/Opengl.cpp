@@ -2,6 +2,7 @@
 #include<GLFW/glfw3.h>
 
 #include <iostream>
+#include <cmath>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height); \
 void processInput(GLFWwindow* window);
@@ -17,17 +18,19 @@ const char* vertexShaderSource = "#version 330 core\n"
      "}\n\0";
 
 const char* fragmentShaderSource = "#version 330 core\n"
-     "out vec4 Fragcolor; \n"
+"out vec4 Fragcolor; \n"
+"uniform vec4 ourColor1;\n"
      "void main ()\n"
      "{\n"
-     "     Fragcolor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+     "     Fragcolor = ourColor1;\n"
      "}\n\0";
 
 const char* fragmentShaderSource2 = "#version 330 core\n"
 "out vec4 Fragcolor; \n"
+"uniform vec4 ourColor;\n"
 "void main ()\n"
 "{\n"
-"     Fragcolor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
+"     Fragcolor = ourColor;\n"
 "}\n\0";
 
 
@@ -153,10 +156,10 @@ int main()
 
 
 
-	0.4f,  0.2f, 0.0f,  // top right
-		0.4f, -0.2f, 0.0f,  // bottom right
-		   0.0f, -0.2f, 0.0f,  // bottom left
-	0.0f,  0.2f, 0.0f,  // top left
+	0.4f,  0.0f, 0.0f,  // top right
+		0.4f, -0.4f, 0.0f,  // bottom right
+		   0.0f, -0.4f, 0.0f,  // bottom left
+	0.0f,  0.0f, 0.0f,  // top left
 
 
 
@@ -193,11 +196,15 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3* sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	
+
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO[0]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	//glBindVertexArray(0);
 
 	glBindVertexArray(VAOs[1]);
 
@@ -213,7 +220,9 @@ int main()
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	glBindVertexArray(0);
+	//glBindVertexArray(0);
+
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -223,15 +232,32 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(shaderProgram);
-		glBindVertexArray(VAOs[0]);
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
-		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+
+	
 
 		glUseProgram(shaderProgram2);
 		glBindVertexArray(VAOs[1]);
+		float timeValue = glfwGetTime();
+		float slide = sin(timeValue*6) /2.0f + 0.5f;
+		float slide1 = cos(timeValue) / 2.0f + 0.5f;
+
+		int vertexColorLocation = glGetUniformLocation(shaderProgram2, "ourColor");
+		glUniform4f(vertexColorLocation, slide1, slide, 0.0f, 1.0f);
+
 		glDrawElements(GL_TRIANGLES, 9,GL_UNSIGNED_INT, 0);
 		//glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+		glUseProgram(shaderProgram);
+		glBindVertexArray(VAOs[0]);
+		
+		int vertexColorLocation1 = glGetUniformLocation(shaderProgram, "ourColor1");
+		glUniform4f(vertexColorLocation1, slide, 0.0f, slide1, 1.0f);
+
+		//glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+
+
 
 
 
